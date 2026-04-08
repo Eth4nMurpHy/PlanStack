@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://eth4nmurphy.github.io/PlanStack/</loc>
-         <lastmod>2026-04-07</lastmod>
+         <lastmod>2026-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://eth4nmurphy.github.io/PlanStack/History/</loc>
+         <lastmod>2026-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://eth4nmurphy.github.io/PlanStack/History/2026-04-07/</loc>
+         <lastmod>2026-04-08</lastmod>
+    </url>
+    <url>
+         <loc>https://eth4nmurphy.github.io/PlanStack/History/2026-04-08/</loc>
+         <lastmod>2026-04-08</lastmod>
     </url>
 </urlset>
