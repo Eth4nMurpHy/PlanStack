@@ -1,0 +1,14 @@
+site_name: PlanStack
+site_url: https://eth4nmurphy.github.io/PlanStack/
+theme:
+  name: material
+
+markdown_extensions:
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+nav:
+  - Home: index.md
+  - Next Plan: next.md
+  - History:
+      - History Index: History/index.md
