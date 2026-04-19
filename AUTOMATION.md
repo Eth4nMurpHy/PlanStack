@@ -155,3 +155,22 @@ python .\scripts\planstack.py sync-dates
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) 会在你 push 到 main 或 master 时自动构建并部署站点。
 
 你还需要在 GitHub 仓库设置里，把 Pages 的来源切换为 GitHub Actions。
+
+如果你不想每次手动输入 git add / commit / push，可以直接运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\publish_site.ps1
+```
+
+如果你想自己写提交说明，可以运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\publish_site.ps1 -Message "Update review for 2026-04-18"
+```
+
+这个脚本会自动：
+
+1. 检查是否有未提交变更。
+2. 执行 git add .。
+3. 执行 git commit。
+4. 执行 git push。
