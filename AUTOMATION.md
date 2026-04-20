@@ -17,9 +17,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\capture_tomorrow_plan.ps1
 这个脚本会：
 
 1. 默认用今天的 docs/index.md 生成下一天草稿。
-2. 默认用记事本打开这个草稿。
-3. 等你保存并关闭文件。
-4. 把结果发布到 docs/next.md。
+2. 默认只生成草稿，不会自动打开记事本。
+3. 让你在 VS Code 里继续编辑草稿。
+4. 之后你再手动把结果发布到 docs/next.md。
 
 默认生成草稿时会：
 
@@ -34,19 +34,25 @@ powershell -ExecutionPolicy Bypass -File .\scripts\capture_tomorrow_plan.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\capture_tomorrow_plan.ps1 -BlankTemplate
 ```
 
-如果你不想用记事本，而是想在 VS Code 里编辑草稿，可以运行：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\capture_tomorrow_plan.ps1 -NoEditor
-```
-
-这个模式只会生成草稿并告诉你路径，不会自动打开记事本，也不会自动发布。你改完后可以直接运行：
+默认模式只会生成草稿并告诉你路径，不会自动打开记事本，也不会自动发布。你改完后可以直接运行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\publish_tomorrow_plan.ps1
 ```
 
-这个脚本会自动找到“明天”对应的草稿并发布到 docs/next.md，不需要你自己再输日期。
+如果你就是想沿用旧行为，让 capture 自动打开记事本并在关闭后继续发布，可以运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\capture_tomorrow_plan.ps1 -OpenInNotepad
+```
+
+如果你已经习惯了旧参数，下面这条仍然可用，但现在它和默认行为相同：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\capture_tomorrow_plan.ps1 -NoEditor
+```
+
+发布脚本会自动找到“明天”对应的草稿并发布到 docs/next.md，不需要你自己再输日期。
 
 这一阶段不会改动 docs/index.md，所以你仍然可以继续在当天首页里写 review。
 

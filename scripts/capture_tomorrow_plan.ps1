@@ -2,7 +2,8 @@ param(
     [string]$PlanDate = (Get-Date).AddDays(1).ToString('yyyy-MM-dd'),
     [switch]$KeepDraft,
     [switch]$BlankTemplate,
-    [switch]$NoEditor
+    [switch]$NoEditor,
+    [switch]$OpenInNotepad
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,7 +35,11 @@ else {
     Write-Host 'Using today home page as the base for tomorrow, with review cleared and checked tasks reset.'
 }
 if ($NoEditor) {
-    Write-Host 'NoEditor mode is on. Edit this draft in VS Code, then publish it manually.'
+    Write-Host 'NoEditor is now the default behavior. Edit this draft in VS Code, then publish it manually.'
+}
+
+if (-not $OpenInNotepad) {
+    Write-Host 'Edit this draft in VS Code, then publish it manually.'
     Write-Host "Publish command: python .\scripts\planstack.py publish-next --next-plan `"$draftPath`""
     exit 0
 }
