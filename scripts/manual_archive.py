@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import calendar
 import datetime as dt
+import random
 import re
 from pathlib import Path
 
@@ -13,6 +14,11 @@ HISTORY_DIR = DOCS_DIR / "History"
 HISTORY_INDEX = HISTORY_DIR / "index.md"
 DATE_HEADER_RE = re.compile(r"^# .*Date:\s*(\d{4}-\d{2}-\d{2})\s*$", re.MULTILINE)
 CHECKBOX_RE = re.compile(r"^([ \t]*- \[)(?:x|X)(\])", re.MULTILINE)
+TIME_BLOCK_SECTION_RE = re.compile(r"(^# ⏰ Time Blocking\s*$)(.*?)(?=^---\s*$)", re.MULTILINE | re.DOTALL)
+TIME_BLOCK_ROW_RE = re.compile(
+    r"^(\|\s*)(\d{2}:\d{2}(?::\d{2})?)-(\d{2}:\d{2}(?::\d{2})?)(\s*\|.*)$",
+    re.MULTILINE,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -69,6 +75,60 @@ def reset_review_sections(content: str) -> str:
         pattern = re.compile(rf"(^## {section_name}\s*$)(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
         content = pattern.sub(r"\1\n", content, count=1)
     return content
+
+
+def parse_time_to_seconds(value: str) -> int:
+    parts = value.split(":")
+    hour = int(parts[0])
+    minute = int(parts[1])
+    second = int(parts[2]) if len(parts) == 3 else 0
+    return hour * 3600 + minute * 60 + second
+
+
+def format_hhmmss(total_seconds: int) -> str:
+    hour = total_seconds // 3600
+    minute = (total_seconds % 3600) // 60
+    second = total_seconds % 60
+    return f"{hour:02d}:{minute:02d}:{second:02d}"
+
+
+def jitter_time_blocking(content: str, max_offset_seconds: int = 180) -> str:
+    if max_offset_seconds < 0:
+        return content
+
+    def replace_section(match: re.Match[str]) -> str:
+        section_title = match.group(1)
+        section_body = match.group(2)
+        rows = list(TIME_BLOCK_ROW_RE.finditer(section_body))
+
+        if not rows:
+            return match.group(0)
+
+        boundaries: list[int] = [parse_time_to_seconds(rows[0].group(2))]
+        for row in rows:
+            boundaries.append(parse_time_to_seconds(row.group(3)))
+
+        rng = random.SystemRandom()
+        shifted = [value + rng.randint(0, max_offset_seconds) for value in boundaries]
+
+        # Keep boundaries strictly increasing so each slot remains logical.
+        for i in range(1, len(shifted)):
+            if shifted[i] <= shifted[i - 1]:
+                shifted[i] = shifted[i - 1] + 1
+
+        rebuilt_parts: list[str] = []
+        previous_end = 0
+        for index, row in enumerate(rows):
+            rebuilt_parts.append(section_body[previous_end : row.start()])
+            new_start = format_hhmmss(shifted[index])
+            new_end = format_hhmmss(shifted[index + 1])
+            rebuilt_parts.append(f"{row.group(1)}{new_start}-{new_end}{row.group(4)}")
+            previous_end = row.end()
+        rebuilt_parts.append(section_body[previous_end:])
+
+        return section_title + "".join(rebuilt_parts)
+
+    return TIME_BLOCK_SECTION_RE.sub(replace_section, content, count=1)
 
 
 def render_template(target_date: dt.date) -> str:
@@ -200,6 +260,8 @@ def main() -> None:
         next_home = replace_plan_date(current_content, next_date)
         next_home = reset_checkboxes(next_home)
         next_home = reset_review_sections(next_home)
+
+    next_home = jitter_time_blocking(next_home, max_offset_seconds=180)
 
     write_text(HOME_PAGE, next_home)
     rebuild_history_index()
